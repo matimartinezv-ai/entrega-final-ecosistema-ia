@@ -1,2 +1,5 @@
 docs/src-*.html
 wf-raw-tmp.json
+docs/*.docx
+docs/diagrama-flujo.png
+~$*
