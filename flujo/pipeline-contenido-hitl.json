@@ -1,0 +1,621 @@
+{
+  "name": "Pipeline Contenido HITL",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 15
+            }
+          ]
+        }
+      },
+      "id": "31afd746-d042-4a73-8d51-2f6557a59acb",
+      "name": "Cada 15 minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        384
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblbIZw01NQVKHXax",
+          "mode": "id",
+          "cachedResultName": "Directrices"
+        },
+        "options": {}
+      },
+      "id": "a4a24686-4986-4f3d-bd26-666022cb1ce5",
+      "name": "Leer directrices (RAG)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        224
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const lineas = items.map(i => `- ${i.json.Tema}: ${i.json.Directriz}`);\nreturn [{ json: { contexto: lineas.join('\\n') } }];"
+      },
+      "id": "5cdf32e6-9df3-4d3e-a48d-fe915c1a75f0",
+      "name": "Unir directrices (RAG)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        224
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaW2iwEOGlclFDN",
+          "mode": "id",
+          "cachedResultName": "Contenidos"
+        },
+        "filterByFormula": "{Estado}='Generando'",
+        "options": {}
+      },
+      "id": "3343de55-4498-4c8f-8db4-b7ab4936f7f7",
+      "name": "Buscar ideas (Generando)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        224
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4o-mini', max_tokens: 400, temperature: 0.7, messages: [ { role: 'system', content: 'Eres el redactor de contenidos de una consultora de automatización e IA para pymes. Redactas posts de LinkedIn en español. Sigue EXCLUSIVAMENTE estas directrices privadas de marca y devuelve solo el texto del post, sin comentarios adicionales:\\n' + $('Unir directrices (RAG)').first().json.contexto }, { role: 'user', content: 'Redacta un post de LinkedIn a partir de esta idea semilla: ' + $json['Idea semilla'] } ] }) }}",
+        "options": {}
+      },
+      "id": "860335ba-70a8-4218-8b92-0ede1464a840",
+      "name": "IA: Redactar post (GPT-4o-mini)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        544,
+        224
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "i0JLvgTWy55B1kwI",
+          "name": "OpenAI (header)"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaW2iwEOGlclFDN",
+          "mode": "id",
+          "cachedResultName": "Contenidos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Buscar ideas (Generando)').item.json.id }}",
+            "Borrador": "={{ $json.choices[0].message.content }}",
+            "Estado": "En revisión"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "5d84c5bd-e50b-49c2-8c74-129704679cb8",
+      "name": "Guardar borrador (pausa HITL)",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        752,
+        224
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaW2iwEOGlclFDN",
+          "mode": "id",
+          "cachedResultName": "Contenidos"
+        },
+        "filterByFormula": "AND({Aprobado}=1,{Estado}='En revisión')",
+        "options": {}
+      },
+      "id": "7b74ad4d-f670-4241-856d-5f9c3c96c399",
+      "name": "Buscar aprobados",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        -128,
+        544
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "c1000000-0000-0000-0000-000000000001",
+              "leftValue": "={{ $json.Aprobado }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a8d9a449-6033-4af1-9d6f-76c0f052b2be",
+      "name": "¿Aprobado? (filtro final)",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        96,
+        544
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://graph.facebook.com/v21.0/1319134744612510/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ messaging_product: 'whatsapp', to: '569XXXXXXXX', type: 'text', text: { body: 'PUBLICADO ✅ Post aprobado y distribuido:\\n\\n' + $json.Borrador } }) }}",
+        "options": {}
+      },
+      "id": "4a59246c-cf4e-424e-9310-9c7bfe7fb148",
+      "name": "Publicar (WhatsApp Cloud API)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        320,
+        496
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "ou5VS6RzNjjpPpUF",
+          "name": "Header Auth account"
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaW2iwEOGlclFDN",
+          "mode": "id",
+          "cachedResultName": "Contenidos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('Buscar aprobados').item.json.id }}",
+            "Estado": "Publicado",
+            "Publicado el": "={{ $now.toISO() }}"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "383b6a44-6fdf-4005-b21c-31d062457ccb",
+      "name": "Marcar publicado",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        496
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "id": "933cdab2-025c-4ba6-bfd4-b799ea8dade5",
+      "name": "Esperando validación humana",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        320,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblm62CjEXpoZnkSX",
+          "mode": "id",
+          "cachedResultName": "Log de errores"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Evento": "Fallo del motor de IA",
+            "Nodo": "IA: Redactar post",
+            "Detalle": "={{ JSON.stringify($json.error ?? $json).slice(0, 800) }}",
+            "Registro afectado": "={{ [$('Buscar ideas (Generando)').item.json.id] }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "e1000000-0000-0000-0000-000000000002",
+      "name": "Log error IA",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        608,
+        64
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblm62CjEXpoZnkSX",
+          "mode": "id",
+          "cachedResultName": "Log de errores"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Evento": "Fallo de publicación WhatsApp",
+            "Nodo": "Publicar (WhatsApp Cloud API)",
+            "Detalle": "={{ JSON.stringify($json.error ?? $json).slice(0, 800) }}",
+            "Registro afectado": "={{ [$('Buscar aprobados').item.json.id] }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "e1000000-0000-0000-0000-000000000008",
+      "name": "Log error WhatsApp",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        384,
+        32
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblm62CjEXpoZnkSX",
+          "mode": "id",
+          "cachedResultName": "Log de errores"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Evento": "Dato faltante: idea semilla vacía",
+            "Nodo": "Validación de entrada",
+            "Detalle": "El registro entró en estado Generando sin texto en Idea semilla. Se detiene su procesamiento (camino infeliz).",
+            "Registro afectado": "={{ [$json.id] }}"
+          },
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "e1000000-0000-0000-0000-000000000007",
+      "name": "Log dato faltante",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        -160
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "v1000000-0000-0000-0000-000000000001",
+              "leftValue": "={{ $json['Idea semilla'] }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "e1000000-0000-0000-0000-000000000009",
+      "name": "¿Idea válida?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        272,
+        -176
+      ]
+    }
+  ],
+  "connections": {
+    "Cada 15 minutos": {
+      "main": [
+        [
+          {
+            "node": "Leer directrices (RAG)",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Buscar aprobados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer directrices (RAG)": {
+      "main": [
+        [
+          {
+            "node": "Unir directrices (RAG)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Unir directrices (RAG)": {
+      "main": [
+        [
+          {
+            "node": "Buscar ideas (Generando)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar ideas (Generando)": {
+      "main": [
+        [
+          {
+            "node": "¿Idea válida?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IA: Redactar post (GPT-4o-mini)": {
+      "main": [
+        [
+          {
+            "node": "Guardar borrador (pausa HITL)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log error IA",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar aprobados": {
+      "main": [
+        [
+          {
+            "node": "¿Aprobado? (filtro final)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Aprobado? (filtro final)": {
+      "main": [
+        [
+          {
+            "node": "Publicar (WhatsApp Cloud API)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Esperando validación humana",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publicar (WhatsApp Cloud API)": {
+      "main": [
+        [
+          {
+            "node": "Marcar publicado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log error WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "¿Idea válida?": {
+      "main": [
+        [
+          {
+            "node": "IA: Redactar post (GPT-4o-mini)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Log dato faltante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {}
+}
