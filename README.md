@@ -28,13 +28,14 @@ Un ecosistema de automatización funcionando en vivo que resuelve un proceso de 
 | [`docs/02-manual-operativo-datos.pdf`](docs/02-manual-operativo-datos.pdf) | Estructuras de datos: tablas vinculadas + esquemas JSON de transferencia |
 | [`docs/03-matriz-costos-ia.pdf`](docs/03-matriz-costos-ia.pdf) | Optimización de costos: matriz de decisión por modelo y tarea |
 | [`docs/04-seguridad-resiliencia.pdf`](docs/04-seguridad-resiliencia.pdf) | Seguridad y resiliencia: minimización de datos, rutas de error, HITL |
-| [`flujo/pipeline-contenido-hitl.json`](flujo/pipeline-contenido-hitl.json) | JSON del workflow de n8n (15 nodos, credenciales no incluidas) |
+| [`flujo/pipeline-contenido-hitl.json`](flujo/pipeline-contenido-hitl.json) | JSON del workflow de n8n (16 nodos, credenciales no incluidas) |
 | [`evidencias/`](evidencias/) | Capturas del flujo, la base, las ejecuciones y el WhatsApp recibido |
 
 ## Enlaces obligatorios
 
-- **Dashboard de control (KPIs y tasa de errores)**: _[PENDIENTE — Shared View pública de Airtable]_
-- **Base de datos en modo lectura**: _[PENDIENTE — Shared link de la base]_
+- **Dashboard de control (KPIs y tasa de errores)**: https://airtable.com/appsD44VEs1s5QgsA/shrtkH6oCJk6hhGjA
+- **Base de control en modo lectura (Contenidos agrupada por estado)**: https://airtable.com/appsD44VEs1s5QgsA/shr7YQSXlckmfgBDJ
+- **Video demo (3 min)**: _[PENDIENTE — se agrega el link al grabar]_
 
 ## Notas de seguridad
 

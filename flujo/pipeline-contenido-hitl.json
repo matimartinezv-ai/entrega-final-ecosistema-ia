@@ -481,6 +481,49 @@
         272,
         -176
       ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "value": "appsD44VEs1s5QgsA",
+          "mode": "id",
+          "cachedResultName": "Centro de Comando Contenidos"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblaW2iwEOGlclFDN",
+          "mode": "id",
+          "cachedResultName": "Contenidos"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "id": "={{ $('¿Idea válida?').item.json.id }}",
+            "Estado": "Rechazado"
+          },
+          "matchingColumns": [
+            "id"
+          ],
+          "schema": []
+        },
+        "options": {}
+      },
+      "id": "f1000000-0000-0000-0000-000000000001",
+      "name": "Retirar registro inválido",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        880,
+        -160
+      ],
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "WImw0hgZcAnBk9se",
+          "name": "Airtable curso"
+        }
+      }
     }
   ],
   "connections": {
@@ -610,6 +653,17 @@
         [
           {
             "node": "Log dato faltante",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log dato faltante": {
+      "main": [
+        [
+          {
+            "node": "Retirar registro inválido",
             "type": "main",
             "index": 0
           }
