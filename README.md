@@ -35,7 +35,7 @@ Un ecosistema de automatización funcionando en vivo que resuelve un proceso de 
 
 - **Dashboard de control (KPIs y tasa de errores)**: https://airtable.com/appsD44VEs1s5QgsA/shrtkH6oCJk6hhGjA
 - **Base de control en modo lectura (Contenidos agrupada por estado)**: https://airtable.com/appsD44VEs1s5QgsA/shr7YQSXlckmfgBDJ
-- **Video demo (3 min)**: _[PENDIENTE — se agrega el link al grabar]_
+- **Video demo (3:31 min)**: [video/video-demo.mp4](video/video-demo.mp4) — trigger, procesamiento en el orquestador, pausa HITL, camino infeliz y resultado final
 
 ## Notas de seguridad
 
