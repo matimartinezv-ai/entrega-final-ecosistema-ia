@@ -1,5 +1,7 @@
 docs/src-*.html
 wf-raw-tmp.json
 docs/*.docx
+docs/*.md
 docs/diagrama-flujo.png
+docs/extract-mati.txt
 ~$*
